@@ -1,5 +1,6 @@
 import { useContext, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useReward } from "react-rewards";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
@@ -42,7 +43,7 @@ export default function ProductForm({ product }: ProductFormProps) {
     defaultValues: {
       name: product?.name || "",
       currency: product?.currency || CurrencyEnum.Usd,
-      price: product?.price || 2,
+      price: (product?.price / 100) || 2,
       description: product?.description || "",
     },
   });
@@ -52,6 +53,8 @@ export default function ProductForm({ product }: ProductFormProps) {
   const [_, setLocation] = useLocation();
 
   const [upsertProduct, { data, error }] = useMutation(UPSERT_PRODUCT_MUTATION);
+
+  const { reward: partyShower } = useReward('partyShower', 'emoji', { emoji: ["🎉"], spread: 60, lifetime: 50 });
 
   useEffect(() => {
     if (
@@ -89,12 +92,14 @@ export default function ProductForm({ product }: ProductFormProps) {
                 input: {
                   product: {
                     ...values,
+                    price: values.price * 100,
                     sellerId: user?.id,
                   },
                   ...(product?.id && { id: product.id }),
                 },
               },
             });
+            partyShower();
           })}
         >
           <FormField
@@ -158,7 +163,10 @@ export default function ProductForm({ product }: ProductFormProps) {
               />
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button type="submit">
+            Submit
+            <span id="partyShower" />
+          </Button>
         </form>
       </Form>
     </>
