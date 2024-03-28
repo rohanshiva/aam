@@ -14,6 +14,7 @@ export default function ProductPage() {
   const { id } = useParams();
 
   const { data, error, loading } = useQuery(PRODUCT_VIEW_QUERY, {
+    fetchPolicy: "no-cache",
     variables: {
       id: id as string,
     },
